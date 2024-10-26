@@ -2,7 +2,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using SalesService.Api.Configuration;
-using ShoppingService.Application.Dtos;
+using SalesService.Api.Middlewares;
+using SalesService.Application.Dtos;
+using Serilog;
+using Serilog.Enrichers.Sensitive;
+using Serilog.Events;
 using System.Text.Json;
 
 namespace SalesService.Api
@@ -13,83 +17,31 @@ namespace SalesService.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
-
-            builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromAssemblyContaining<Program>());
-
-            builder.Services.AddResponseCompression();
-
-            builder.Services.AddAuthorization();
-
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
-
-            builder.Services.AddApiVersioning(options =>
-            {
-                options.AssumeDefaultVersionWhenUnspecified = true;
-                options.DefaultApiVersion = new ApiVersion(1, 0);
-                options.ReportApiVersions = true;
-            });
-
-            builder.Services.AddVersionedApiExplorer(options =>
-            {
-                options.GroupNameFormat = "'v'VVV";
-                options.SubstituteApiVersionInUrl = true;
-            });
-
-            builder.Services.AddControllers(options =>
-            {
-                options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
-            });
-
-            builder.Services.Configure<JsonSerializerOptions>(options =>
-            {
-                options.PropertyNameCaseInsensitive = true;
-                options.WriteIndented = true;
-            });
-
-            builder.Services.Configure<ApiBehaviorOptions>(options =>
-            {
-                options.InvalidModelStateResponseFactory = actionContext =>
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .WriteTo.File(
+                    path: "Logs/log-.txt",
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 7,
+                    fileSizeLimitBytes: 10 * 1024 * 1024,
+                    rollOnFileSizeLimit: true
+                )
+                .Enrich.WithSensitiveDataMasking(options =>
                 {
-                    var errors = actionContext.ModelState.Values.SelectMany(e => e.Errors);
-                    var errorMsgs = errors.Select(e => e.Exception?.Message ?? e.ErrorMessage).ToList();
-                    var response = new ApiResponse
-                    {
-                        Success = false,
-                        Message = "Ocorreram erros durante o processamento da operação:",
-                        Errors = errorMsgs
-                    };
-                    return new BadRequestObjectResult(response);
-                };
-            });
+                    options.MaskValue = "*** PII HIDDEN ***";
+                    options.MaskProperties = ["Authorization", "Cookie", "Set-Cookie"];
+                    options.Mode = MaskingMode.Globally;
+                })
+                .CreateLogger();
 
-            builder.Services.AddSwaggerConfiguration();
+            builder.Host.UseSerilog();
 
-            builder.Services.AddEndpointsApiExplorer();
-
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("Open", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
-            });
+            builder.ConfigureServices();
 
             var app = builder.Build();
 
-            app.UseSwaggerConfiguration();
-
-            app.UseHttpsRedirection();
-
-            app.UseCors("Open");
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseResponseCompression();
-
-            app.MapGet("/", () => "App online!");
-
-            app.MapControllerRoute("default", "/[controller]")
-                .RequireAuthorization();
+            app.Configure();            
 
             await app.RunAsync();
         }
