@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Marten;
+using Marten.Events.Daemon.Resiliency;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using SalesService.Api.Middlewares;
 using SalesService.Application.Dtos;
+using SalesService.Application.Features.SalesRepresentatives.GetSalesRepresentatives;
+using SalesService.Persistence;
 using System.Text.Json;
+using Weasel.Core;
 
 namespace SalesService.Api.Configuration
 {
@@ -15,9 +20,21 @@ namespace SalesService.Api.Configuration
 
             builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
+            builder.Services.AddScoped<UnitOfWork>();
+
             builder.Services.AddControllers();
 
-            builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromAssemblyContaining<Program>());
+            builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+            builder.Services.AddMarten(options =>
+            {
+                options.UseSystemTextJsonForSerialization();
+                options.AutoCreateSchemaObjects = AutoCreate.All;
+            })
+                .UseNpgsqlDataSource()
+                .AddAsyncDaemon(DaemonMode.Solo);
+
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetSalesRepresentativesQuery>());
 
             builder.Services.AddResponseCompression();
 

@@ -1,13 +1,7 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using SalesService.Api.Configuration;
-using SalesService.Api.Middlewares;
-using SalesService.Application.Dtos;
 using Serilog;
 using Serilog.Enrichers.Sensitive;
 using Serilog.Events;
-using System.Text.Json;
 
 namespace SalesService.Api
 {
@@ -41,7 +35,7 @@ namespace SalesService.Api
 
             var app = builder.Build();
 
-            app.Configure();            
+            app.Configure();
 
             await app.RunAsync();
         }

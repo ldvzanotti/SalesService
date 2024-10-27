@@ -11,5 +11,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
     <PackageReference Include="System.Text.Encodings.Web" Version="8.0.0" />
   </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\SalesService.Domain\SalesService.Domain.csproj" />
+    <ProjectReference Include="..\SalesService.Persistence\SalesService.Persistence.csproj" />
+  </ItemGroup>
 
 </Project>

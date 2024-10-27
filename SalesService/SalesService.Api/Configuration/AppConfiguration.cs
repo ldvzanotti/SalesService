@@ -1,4 +1,5 @@
 ﻿using SalesService.Api.Middlewares;
+using SalesService.Persistence;
 
 namespace SalesService.Api.Configuration
 {
@@ -6,6 +7,8 @@ namespace SalesService.Api.Configuration
     {
         public static void Configure(this WebApplication app)
         {
+            app.SeedData();
+
             app.UseMiddleware<RequestLoggingMiddleware>();
 
             app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -26,6 +29,15 @@ namespace SalesService.Api.Configuration
 
             app.MapControllerRoute("default", "/[controller]")
                 .RequireAuthorization();
+        }
+
+        private static void SeedData(this WebApplication app)
+        {
+            using var scope = app.Services.CreateScope();
+
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+
+            unitOfWork.SeedData();
         }
     }
 }
