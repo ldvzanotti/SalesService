@@ -5,7 +5,7 @@ using SalesService.Domain.Aggregates.Orders;
 using SalesService.Domain.Aggregates.Products;
 using SalesService.Domain.Aggregates.SalesRepresentatives;
 
-namespace SalesService.Application.Features.Orders.GetOrder
+namespace SalesService.Application.Features.Orders.GetOrderDetails
 {
     public class GetOrderDetailsHandler(IQuerySession querySession)
         : IRequestHandler<GetOrderDetailsQuery, GetOrderDetailsResponse>

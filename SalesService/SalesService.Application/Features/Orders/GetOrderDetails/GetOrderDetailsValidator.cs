@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace SalesService.Application.Features.Orders.GetOrder
+namespace SalesService.Application.Features.Orders.GetOrderDetails
 {
     internal class GetOrderDetailsValidator : AbstractValidator<GetOrderDetailsQuery>
     {

@@ -1,7 +1,7 @@
 ﻿using SalesService.Application.Dtos;
 using System.Text.Json.Serialization;
 
-namespace SalesService.Application.Features.Orders.GetOrder
+namespace SalesService.Application.Features.Orders.GetOrderDetails
 {
     public record GetOrderDetailsResponse : ApiResponse
     {

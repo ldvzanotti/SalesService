@@ -23,8 +23,6 @@ namespace SalesService.Api.Configuration
 
             builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
-            builder.Services.AddControllers();
-
             builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("DefaultConnection"));
 
             builder.Services.AddMarten(options =>
@@ -69,7 +67,7 @@ namespace SalesService.Api.Configuration
                     var response = new ApiResponse
                     {
                         Success = false,
-                        Message = "Ocorreram erros durante o processamento da operação:",
+                        Message = "Ocorreram erros durante o processamento da operação.",
                         Errors = errorMsgs
                     };
                     return new BadRequestObjectResult(response);
