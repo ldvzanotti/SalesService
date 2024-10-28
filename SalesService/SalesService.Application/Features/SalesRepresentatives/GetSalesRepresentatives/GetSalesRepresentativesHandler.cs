@@ -1,18 +1,19 @@
-﻿using MediatR;
+﻿using Marten;
+using MediatR;
 using SalesService.Application.Utils;
 using SalesService.Domain.Aggregates.SalesRepresentatives;
-using SalesService.Persistence;
 
 namespace SalesService.Application.Features.SalesRepresentatives.GetSalesRepresentatives
 {
-    public class GetSalesRepresentativesHandler(UnitOfWork unitOfWork)
+    public class GetSalesRepresentativesHandler(IQuerySession querySession)
         : IRequestHandler<GetSalesRepresentativesQuery, GetSalesRepresentativesResponse>
     {
         public async Task<GetSalesRepresentativesResponse> Handle(GetSalesRepresentativesQuery query, CancellationToken cancellationToken)
         {
             var salesRepresentatives = query.TaxpayerRegistration.IsEmpty() ?
-                await unitOfWork.ListAsync<SalesRepresentative>(cancellationToken: cancellationToken) :
-                await unitOfWork.ListAsync<SalesRepresentative>(s => query.TaxpayerRegistration.Equals(s.TaxpayerRegistration), cancellationToken: cancellationToken);
+                await querySession.Query<SalesRepresentative>().ToListAsync(cancellationToken) :
+                await querySession.Query<SalesRepresentative>()
+                    .Where(s => query.TaxpayerRegistration.Equals(s.TaxpayerRegistration)).ToListAsync(cancellationToken);
 
             return new GetSalesRepresentativesResponse(Map(salesRepresentatives));
         }
@@ -21,8 +22,8 @@ namespace SalesService.Application.Features.SalesRepresentatives.GetSalesReprese
         {
             return salesRepresentatives.Select(s => new SalesRepresentativeDto(
                 FullName: s.FullName,
-                TaxpayerRegistration: s.TaxpayerRegistration,
-                Phone: s.PhoneNumber,
+                TaxpayerRegistration: s.TaxpayerRegistration.MaskTaxpayerRegistration(),
+                Phone: s.PhoneNumber.MaskPhoneNumber(),
                 Email: s.Email)
             ).ToList();
         }

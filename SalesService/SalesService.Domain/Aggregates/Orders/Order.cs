@@ -1,15 +1,46 @@
 ﻿using SalesService.Domain.Abstractions;
+using SalesService.Domain.Aggregates.Orders.Events;
 
 namespace SalesService.Domain.Aggregates.Orders
 {
-    public class Order(List<Item> items, Guid salesRepresentativeId) : Entity, IAggregateRoot
+    public record Order : IEntity, IAggregateRoot
     {
-        public List<Item> Items { get; set; } = items;
-        public Guid SalesRepresentativeId { get; set; } = salesRepresentativeId;
-        public OrderStatus Status { get; set; } = OrderStatus.PaymentPending;
+        public Guid Id { get; init; }
+        public DateTime CreationDate { get; init; }
+        public List<Item> Items { get; set; }
+        public Guid SalesRepresentativeId { get; set; }
+        public OrderStatus Status { get; set; }
 
-        public void UpdateStatus(OrderStatus newStatus) => Status = newStatus;
+        public Order() { }
 
-        public void UpdateItems(List<Item> items) => Items = items;
+        public Order(Guid id, List<Item> items, Guid salesRepresentativeId, OrderStatus orderStatus, DateTime creationDate)
+        {
+            Id = id;
+            Items = items;
+            SalesRepresentativeId = salesRepresentativeId;
+            CreationDate = creationDate;
+            Status = orderStatus;
+        }
+
+        public static Order Create(OrderCreated @event)
+        {
+            return new Order(
+                @event.Id,
+                @event.Items,
+                @event.SalesRepresentativeId,
+                OrderStatus.PaymentPending,
+                @event.CreationDate
+            );
+        }
+
+        public Order Apply(OrderStatusUpdated @event) => this with
+        {
+            Status = @event.NewStatus
+        };
+
+        public Order Apply(OrderItemsUpdated @event) => this with
+        {
+            Items = @event.NewItems
+        };
     }
 }

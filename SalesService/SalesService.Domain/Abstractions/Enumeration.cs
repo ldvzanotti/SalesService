@@ -4,8 +4,8 @@ namespace SalesService.Domain.Abstractions
 {
     public abstract class Enumeration : IComparable
     {
-        public int Id { get; private set; }
         public string Name { get; private set; }
+        public int Id { get; private set; }
 
         protected Enumeration(int id, string name) => (Id, Name) = (id, name);
 
@@ -15,8 +15,8 @@ namespace SalesService.Domain.Abstractions
             typeof(T).GetFields(BindingFlags.Public |
                                 BindingFlags.Static |
                                 BindingFlags.DeclaredOnly)
-                     .Select(f => f.GetValue(null))
-                     .Cast<T>();
+                        .Select(f => f.GetValue(null))
+                        .Cast<T>();
 
         public override bool Equals(object obj)
         {
@@ -31,46 +31,29 @@ namespace SalesService.Domain.Abstractions
             return typeMatches && valueMatches;
         }
 
-        public int CompareTo(object obj) => Id.CompareTo(((Enumeration)obj)?.Id);
+        public override int GetHashCode() => Id.GetHashCode();
 
-        public override int GetHashCode()
+        public static int AbsoluteDifference(Enumeration firstValue, Enumeration secondValue)
         {
-            throw new NotImplementedException();
+            var absoluteDifference = Math.Abs(firstValue.Id - secondValue.Id);
+            return absoluteDifference;
         }
 
-        public static bool operator ==(Enumeration left, Enumeration right)
+        public static T FromId<T>(int id) where T : Enumeration
         {
-            if (left is null)
-            {
-                return right is null;
-            }
-
-            return left.Equals(right);
+            return Parse<T, int>(id, nameof(Id), item => item.Id == id);
         }
 
-        public static bool operator !=(Enumeration left, Enumeration right)
+        public static T FromName<T>(string name) where T : Enumeration
         {
-            return !(left == right);
+            return Parse<T, string>(name, nameof(Name), item => item.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
-        public static bool operator <(Enumeration left, Enumeration right)
+        protected static T Parse<T, K>(K value, string description, Func<T, bool> predicate) where T : Enumeration
         {
-            return left is null ? right is not null : left.CompareTo(right) < 0;
+            return GetAll<T>().FirstOrDefault(predicate) ?? throw new InvalidOperationException($"'{value}' is not a valid {description} in {typeof(T)}");
         }
 
-        public static bool operator <=(Enumeration left, Enumeration right)
-        {
-            return left is null || left.CompareTo(right) <= 0;
-        }
-
-        public static bool operator >(Enumeration left, Enumeration right)
-        {
-            return left is not null && left.CompareTo(right) > 0;
-        }
-
-        public static bool operator >=(Enumeration left, Enumeration right)
-        {
-            return left is null ? right is null : left.CompareTo(right) >= 0;
-        }
+        public int CompareTo(object obj) => Id.CompareTo(((Enumeration)obj).Id);
     }
 }

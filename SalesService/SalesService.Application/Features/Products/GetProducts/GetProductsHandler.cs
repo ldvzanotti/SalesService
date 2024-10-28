@@ -1,18 +1,18 @@
-﻿using MediatR;
+﻿using Marten;
+using MediatR;
 using SalesService.Application.Utils;
 using SalesService.Domain.Aggregates.Products;
-using SalesService.Persistence;
 
 namespace SalesService.Application.Features.Products.GetProducts
 {
-    public class GetProductsHandler(UnitOfWork unitOfWork)
+    public class GetProductsHandler(IQuerySession querySession)
         : IRequestHandler<GetProductsQuery, GetProductsResponse>
     {
         public async Task<GetProductsResponse> Handle(GetProductsQuery query, CancellationToken cancellationToken)
         {
             var products = query.Barcode.IsEmpty() ?
-                await unitOfWork.ListAsync<Product>(cancellationToken: cancellationToken) :
-                await unitOfWork.ListAsync<Product>(p => query.Barcode.Equals(p.Barcode), cancellationToken: cancellationToken);
+                await querySession.Query<Product>().ToListAsync(cancellationToken) :
+                await querySession.Query<Product>().Where(p => query.Barcode.Equals(p.Barcode)).ToListAsync(cancellationToken);
 
             return new GetProductsResponse(Map(products));
         }

@@ -1,4 +1,9 @@
-﻿using SalesService.Api.Middlewares;
+﻿using Marten;
+using SalesService.Api.Middlewares;
+using SalesService.Domain.Aggregates.Orders;
+using SalesService.Domain.Aggregates.Orders.Events;
+using SalesService.Domain.Aggregates.Products;
+using SalesService.Domain.Aggregates.SalesRepresentatives;
 using SalesService.Persistence;
 
 namespace SalesService.Api.Configuration
@@ -35,9 +40,30 @@ namespace SalesService.Api.Configuration
         {
             using var scope = app.Services.CreateScope();
 
-            var unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+            var documentStore = scope.ServiceProvider.GetRequiredService<IDocumentStore>();
 
-            unitOfWork.SeedData();
+            using var session = documentStore.LightweightSession();
+
+            if (!session.Query<Product>().Any())
+            {
+                session.Store(InitialData.Products);
+            }
+
+            if (!session.Query<SalesRepresentative>().Any())
+            {
+                session.Store(InitialData.SalesRepresentatives);
+            }
+
+            if (!session.Query<Order>().Any())
+            {
+                foreach (var order in InitialData.OrderEvents)
+                {
+                    session.Events.StartStream<Order>(order.Key, order.Value.OfType<OrderCreated>().Single());
+                    session.Events.Append(order.Key, order.Value.Where(e => e.GetType() != typeof(OrderCreated)));
+                }
+            }
+
+            session.SaveChangesAsync();
         }
     }
 }
