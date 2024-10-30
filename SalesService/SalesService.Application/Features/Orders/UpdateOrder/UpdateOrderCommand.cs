@@ -9,9 +9,9 @@ namespace SalesService.Application.Features.Orders.UpdateOrder
         public Guid OrderId { get; set; }
 
         [Required(ErrorMessage = "Devem ser informadas as atualizações do pedido.")]
-        public UpdatedOrderDto Order { get; set; }
+        public UpdateOrderDto Order { get; set; }
 
-        public UpdateOrderCommand(Guid orderId, UpdatedOrderDto order)
+        public UpdateOrderCommand(Guid orderId, UpdateOrderDto order)
         {
             OrderId = orderId;
             Order = order;

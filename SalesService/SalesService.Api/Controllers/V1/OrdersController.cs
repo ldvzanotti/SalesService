@@ -30,15 +30,15 @@ namespace SalesService.Api.Controllers.V1
             if (!result.Success)
                 return BadRequest(result);
 
-            return CreatedAtAction(nameof(GetOrderDetails), new { id = result.Order.Id }, result.Order);
+            return CreatedAtAction(nameof(GetOrderDetails), new { id = result.Order.Id }, result);
         }
 
         [HttpPatch("{id}")]
         [SwaggerOperation("Atualizar um pedido.")]
         [SwaggerResponse(StatusCodes.Status200OK, "Pedido atualizado.", Type = typeof(UpdateOrderResponse))]
-        public async Task<IActionResult> UpdateOrderStatus(
+        public async Task<IActionResult> UpdateOrder(
             [SwaggerParameter("ID do pedido:", Required = true), FromRoute] Guid id,
-            [SwaggerRequestBody("Dados do pedido", Required = true), FromBody] UpdatedOrderDto order)
+            [SwaggerRequestBody("Dados do pedido", Required = true), FromBody] UpdateOrderDto order)
         {
             var result = await _mediator.Send(new UpdateOrderCommand(id, order));
 

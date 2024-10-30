@@ -30,7 +30,7 @@ namespace SalesService.Application.Features.Orders.UpdateOrder
                 .WithMessage((command, updatedOrder) => $"Status {updatedOrder.Status} inválido.")
 
                 .Must(updatedOrder => updatedOrder.Items is not null && updatedOrder.Items.TrueForAll(i => i.Units > 0))
-                .When(command => command.Order.Status is not null)
+                .When(command => command.Order.Status is null)
                 .WithMessage((command, updatedOrder) => $"Um pedido deve conter pelo menos 1 unidade de cada produto.");
         }
     }

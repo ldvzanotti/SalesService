@@ -37,7 +37,7 @@ namespace SalesService.Application.Features.Orders.UpdateOrder
             return result.IsValid;
         }
 
-        private async Task UpdateOrder(UpdatedOrderDto updatedOrder, Order order, CancellationToken cancellationToken)
+        private async Task UpdateOrder(UpdateOrderDto updatedOrder, Order order, CancellationToken cancellationToken)
         {
             var events = new List<IEntityEvent>();
 

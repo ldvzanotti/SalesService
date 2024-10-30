@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using SalesService.Api.Authentication;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace SalesService.Api.Configuration

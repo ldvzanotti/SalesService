@@ -5,7 +5,7 @@ using Serilog.Events;
 
 namespace SalesService.Api
 {
-    public class Program
+    public partial class Program
     {
         public static async Task Main(string[] args)
         {
@@ -39,5 +39,10 @@ namespace SalesService.Api
 
             await app.RunAsync();
         }
+    }
+
+    public partial class Program
+    {
+
     }
 }

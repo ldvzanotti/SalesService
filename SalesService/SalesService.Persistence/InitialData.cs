@@ -65,6 +65,12 @@ namespace SalesService.Persistence
                     new OrderStatusUpdated(Guid.Parse("ED7F46D1-5D35-4FF2-93E1-EF8881CB4B59"), OrderStatus.ShippedToCarrier),
                     new OrderStatusUpdated(Guid.Parse("ED7F46D1-5D35-4FF2-93E1-EF8881CB4B59"),OrderStatus.Delivered)
                 ]
+            },
+            {
+                Guid.Parse("F0CBD493-6F48-46AD-8D69-2D4ECFFAD6D8"),
+                [
+                    new OrderCreated([new(Products[0].Id, 4), new(Products[1].Id, 50)], SalesRepresentatives[1].Id, Guid.Parse("F0CBD493-6F48-46AD-8D69-2D4ECFFAD6D8"), new DateTime(2024, 10, 27, 11, 21, 41, DateTimeKind.Utc))
+                ]
             }
         };
     }

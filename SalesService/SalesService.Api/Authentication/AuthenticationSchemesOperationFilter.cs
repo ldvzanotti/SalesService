@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace SalesService.Api.Configuration
+namespace SalesService.Api.Authentication
 {
     public class AuthenticationSchemesOperationFilter : IOperationFilter
     {

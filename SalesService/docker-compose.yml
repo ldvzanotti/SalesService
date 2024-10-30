@@ -1,30 +1,30 @@
-version: '3.8'
-
 services:
-  sales_service:
-    build:
-      context: .
+  backend:
+    build:      
       dockerfile: SalesService.Api/Dockerfile
+      context: .
     ports:
       - "8080:8080"
       - "8081:8081"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=localhost;Database=SalesServiceDb;Username=superadmin;Password=random@SECURE1234!
+      - ASPNETCORE_ENVIRONMENT=Release
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=SalesServiceDb;Username=postgres;Password=random@SECURE1234! 
     depends_on:
-      - postgres_db
+      postgres:
+        condition: service_healthy
 
-  postgres_db:
+  postgres:
     image: postgres:15
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 15s
+      timeout: 5s
+      retries: 2
     environment:
       - POSTGRES_DB=SalesServiceDb
-      - POSTGRES_USER=superadmin
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=random@SECURE1234!
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
+  

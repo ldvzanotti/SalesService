@@ -1,10 +1,4 @@
-﻿using Marten;
-using SalesService.Api.Middlewares;
-using SalesService.Domain.Aggregates.Orders;
-using SalesService.Domain.Aggregates.Orders.Events;
-using SalesService.Domain.Aggregates.Products;
-using SalesService.Domain.Aggregates.SalesRepresentatives;
-using SalesService.Persistence;
+﻿using SalesService.Api.Middlewares;
 
 namespace SalesService.Api.Configuration
 {
@@ -12,8 +6,6 @@ namespace SalesService.Api.Configuration
     {
         public static void Configure(this WebApplication app)
         {
-            app.SeedData();
-
             app.UseMiddleware<RequestLoggingMiddleware>();
 
             app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -34,36 +26,6 @@ namespace SalesService.Api.Configuration
 
             app.MapControllerRoute("default", "/[controller]")
                 .RequireAuthorization();
-        }
-
-        private static void SeedData(this WebApplication app)
-        {
-            using var scope = app.Services.CreateScope();
-
-            var documentStore = scope.ServiceProvider.GetRequiredService<IDocumentStore>();
-
-            using var session = documentStore.LightweightSession();
-
-            if (!session.Query<Product>().Any())
-            {
-                session.Store(InitialData.Products);
-            }
-
-            if (!session.Query<SalesRepresentative>().Any())
-            {
-                session.Store(InitialData.SalesRepresentatives);
-            }
-
-            if (!session.Query<Order>().Any())
-            {
-                foreach (var order in InitialData.OrderEvents)
-                {
-                    session.Events.StartStream<Order>(order.Key, order.Value.OfType<OrderCreated>().Single());
-                    session.Events.Append(order.Key, order.Value.Where(e => e.GetType() != typeof(OrderCreated)));
-                }
-            }
-
-            session.SaveChangesAsync();
         }
     }
 }
